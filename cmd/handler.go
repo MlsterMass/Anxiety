@@ -1,9 +1,10 @@
 package main
 
 import (
+	"github.com/MlsterMass/Axiety/repository"
 	"net/http"
 )
 
-func (s *app.Specialists) ServiceHandler(w http.ResponseWriter, r *http.Request) {
+func (s *repository.Specialists) ServiceHandler(w http.ResponseWriter, r *http.Request) {
 	fsfs
 }
