@@ -5,5 +5,5 @@ import (
 )
 
 func (s *app.Specialists) ServiceHandler(w http.ResponseWriter, r *http.Request) {
-
+	fsfs
 }
