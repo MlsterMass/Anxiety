@@ -1,16 +1,22 @@
 package main
 
 import (
+	"Anxiety/handlers"
 	"github.com/gorilla/mux"
 )
 
-func router() *mux.Router {
+func InitRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/services/{category}", ServiceHandler).Methods("GET")
-	r.HandleFunc("/specialists/{id}", SpecialistsHandler).Methods("GET")
-	r.HandleFunc("/fasthelp/", FastHelpHandler).Methods("GET")
-	r.HandleFunc("/about/", AboutHandler).Methods("GET")
-	r.HandleFunc("/contacts/", ContactsHandler).Methods("GET")
+
+	r.HandleFunc("/registration", handlers.Registration).Methods("POST")
+	r.HandleFunc("/auth", handlers.Auth).Methods("POST")
+	r.HandleFunc("/logout", handlers.Logout).Methods("GET")
+
+	r.HandleFunc("/services/{category}", handlers.ServiceHandler).Methods("GET")
+	r.HandleFunc("/specialists/{id}", handlers.SpecialistsHandler).Methods("GET")
+	r.HandleFunc("/fasthelp", handlers.FastHelpHandler).Methods("GET")
+	r.HandleFunc("/about", handlers.AboutHandler).Methods("GET")
+	r.HandleFunc("/contacts", handlers.ContactsHandler).Methods("GET")
 
 	return r
 }
