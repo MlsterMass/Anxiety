@@ -1,20 +1,39 @@
 package handlers
 
 import (
+	"Anxiety/repository"
 	"fmt"
 	"github.com/gorilla/mux"
-	"log"
 	"net/http"
+	"strconv"
 )
 
-func Registration(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		log.Fatal(err)
+func RegistrationUser(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		fmt.Fprintf(w, "ParseForm() err: %v", err)
+		return
 	}
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "User : ", r.Form.Get("name"))
+	children, err := strconv.ParseBool(r.FormValue("children"))
+	if err != nil {
+		fmt.Println("Incorrect value")
+	}
+	pets, err := strconv.ParseBool(r.FormValue("pets"))
+	if err != nil {
+		fmt.Println("Incorrect value")
+	}
+	user := repository.Users{
+		Name:      r.FormValue("name"),
+		Nickname:  r.FormValue("nickname"),
+		Gender:    r.FormValue("gender"),
+		Status:    r.FormValue("status"),
+		Childrens: children,
+		Pets:      pets,
+		Location:  r.FormValue("location"),
+		Password:  r.FormValue("password"),
+	}
 
+	w.WriteHeader(http.StatusOK)
+	fmt.Println(user)
 }
 
 func Auth(w http.ResponseWriter, r *http.Request) {
