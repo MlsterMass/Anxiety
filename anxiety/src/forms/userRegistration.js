@@ -16,7 +16,8 @@ class UserRegistration extends Component {
         };
     }
 
-    createUser = () => {
+    createUser = event => {
+        event.preventDefault()
         axios.post(
             `/registration/user?name=${this.state.name}&nickname=${this.state.nickname}&gender=${this.state.gender}&status=${this.state.status}&children=${this.state.children}&pets=${this.state.pets}&location=${this.state.location}&password=${this.state.password}`,
             "",
@@ -53,12 +54,12 @@ class UserRegistration extends Component {
             status: event.target.value
         });
     }
-    handleChildren = event => {
+    handleChildren = () => {
         this.setState({
             children: 1
         });
     }
-    handlePets = event => {
+    handlePets = () => {
         this.setState({
             pets: 1
         });

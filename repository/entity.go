@@ -5,15 +5,15 @@ import (
 )
 
 type Users struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	Name      string             `bson:"name,omitempty" json:"name" validate:"min=5"`
-	Nickname  string             `bson:"nickname,omitempty" json:"nickname" validate:"min=5"`
-	Gender    string             `bson:"gender" json:"gender"`
-	Status    string             `bson:"status" json:"status"`
-	Childrens bool               `bson:"childrens" json:"childrens"`
-	Pets      bool               `bson:"pets" json:"pets"`
-	Location  string             `bson:"location" json:"location"`
-	Password  string             `bson:"password" json:"password"`
+	ID       primitive.ObjectID `bson:"_id"`
+	Name     string             `bson:"name,omitempty" json:"name" validate:"min=5"`
+	Nickname string             `bson:"nickname,omitempty" json:"nickname" validate:"min=5"`
+	Gender   string             `bson:"gender" json:"gender"`
+	Status   string             `bson:"status" json:"status"`
+	Children bool               `bson:"children" json:"children"`
+	Pets     bool               `bson:"pets" json:"pets"`
+	Location string             `bson:"location" json:"location"`
+	Password string             `bson:"password" json:"password"`
 }
 type Specialists struct {
 	ID        primitive.ObjectID `bson:"_id"`
