@@ -78,11 +78,11 @@ func RegistrationUser(w http.ResponseWriter, r *http.Request) {
 		Password: r.FormValue("password"),
 	}
 	w.WriteHeader(http.StatusOK)
-	insertResult, err := collection.InsertOne(context.Background(), user)
+	_, err = collection.InsertOne(context.Background(), user)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println(insertResult.InsertedID)
+	fmt.Println("User added")
 
 }
 
