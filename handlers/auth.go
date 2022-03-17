@@ -33,9 +33,12 @@ func createDBInstance() {
 	connectionString := os.Getenv("DB_URI")
 	dbName := os.Getenv("DB_NAME")
 	collName := os.Getenv("DB_USERS")
-
-	clientOptions := options.Client().ApplyURI(connectionString)
-
+	credential := options.Credential{
+		Username: os.Getenv("DB_ADMIN"),
+		Password: os.Getenv("DB_ADMIN_PASSWORD"),
+	}
+	clientOptions :=
+		options.Client().ApplyURI(connectionString).SetAuth(credential)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 
 	if err != nil {
@@ -78,11 +81,11 @@ func RegistrationUser(w http.ResponseWriter, r *http.Request) {
 		Password: r.FormValue("password"),
 	}
 	w.WriteHeader(http.StatusOK)
-	_, err = collection.InsertOne(context.Background(), user)
+	createdUser, err := collection.InsertOne(context.Background(), user)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println("User added")
+	fmt.Println("User created ", createdUser.InsertedID)
 
 }
 

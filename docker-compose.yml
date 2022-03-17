@@ -8,15 +8,24 @@ services:
       - ./scripts/mongo/init:/home/mongodb
       - ./scripts/mongo/seed/:/home/mongodb/seed
       - anxietydb:/data/db
+    command: ['--auth']
+    restart: always
+    env_file:
+      - .env
     ports:
       - "28017:27017"
     environment:
-#      - MONGO_INITDB_ROOT_USERNAME=admin
-#      - MONGO_INITDB_ROOT_PASSWORD=x8Tmpq090*
-#      - APP_USER=ghost
-#      - APP_PWD=batman
-      - DB_NAME=Anxiety
-      - DB_COLLECTION_NAME=users
+      - MONGO_INITDB_ROOT_USERNAME=$DB_ADMIN
+      - MONGO_INITDB_ROOT_PASSWORD=$DB_ADMIN_PASSWORD
+      - DB_NAME=$DB_NAME
+      - DB_COLLECTION_NAME=$DB_USERS
       - MONGO_HOSTNAME=mongodb
+    networks:
+      - mongo-network
 volumes:
   anxietydb:
+    driver: local
+
+networks:
+  mongo-network:
+    driver: bridge
