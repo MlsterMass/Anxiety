@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +17,7 @@ import (
 )
 
 var collection *mongo.Collection
+var validate *validator.Validate
 
 func init() {
 	loadTheEnv()
@@ -80,12 +82,24 @@ func RegistrationUser(w http.ResponseWriter, r *http.Request) {
 		Location: r.FormValue("location"),
 		Password: r.FormValue("password"),
 	}
+	err = validateStruct(user)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 	createdUser, err := collection.InsertOne(context.Background(), user)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 	fmt.Println("User created ", createdUser.InsertedID)
+
+}
+func User(w http.ResponseWriter, r *http.Request) {
+	user := mux.Vars(r)
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Specialist: %v\n", user)
 
 }
 
@@ -101,4 +115,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Specialist: %v\n", user)
 
+}
+func validateStruct(user repository.Users) error {
+	validate = validator.New()
+	err := validate.Struct(user)
+	if err != nil {
+		return err
+	}
+	return nil
 }

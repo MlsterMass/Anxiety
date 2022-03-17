@@ -11,6 +11,7 @@ func InitRouter() *mux.Router {
 	r.HandleFunc("/registration/user", handlers.RegistrationUser).Methods("POST")
 	r.HandleFunc("/auth", handlers.Auth).Methods("POST")
 	r.HandleFunc("/logout", handlers.Logout).Methods("GET")
+	r.HandleFunc("/user", handlers.User).Methods("GET")
 
 	r.HandleFunc("/services/{category}", handlers.ServiceHandler).Methods("GET")
 	r.HandleFunc("/specialists/{id}", handlers.SpecialistsHandler).Methods("GET")

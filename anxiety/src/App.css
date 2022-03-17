@@ -37,10 +37,7 @@
 }
 .registration {
     list-style-type: none;
-    margin: 0;
-    padding-left: 20px;
-    padding-right: 20px;
-    display: inline;
+    display: inline-block;
 }
 .services .column {
     float: left;
@@ -48,7 +45,12 @@
     padding-left: 100px;
 
 }
-
+.user {
+    padding: 10px;
+}
+.registration_button {
+    margin: 10px;
+}
 .services .row:after {
     content: "";
     display: table;

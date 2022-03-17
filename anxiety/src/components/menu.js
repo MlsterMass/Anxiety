@@ -1,16 +1,35 @@
 import React, {Component} from 'react';
+import axios from "axios";
 
 class Menu extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            value:'user'
+            value:'user',
+            user: 'User',
         };
         this.handleUserType = this.handleUserType.bind(this)
     }
 
     handleUserType(event){
         this.setState({value: event.target.value});
+    }
+    getUser = () => {
+        axios.get(
+            "/user",
+            "",
+            {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Access-Control-Allow-Origin": "*",
+                },
+            })
+            .then(response => {
+                this.setState({user: response.data.user});
+            })
+            .catch(error => {
+                console.log(error);
+            });
     }
     render() {
         return (
@@ -21,11 +40,12 @@ class Menu extends Component {
             <li><a href="">Быстрая помощь</a></li>
             <li><a href="">О нас</a></li>
             <li><a href="">Контакты</a></li>
-            <span>Anxiety bot TG   </span>
-            <span>+38098000000</span>
-            <li className="registration">
+            <li><span>Anxiety bot TG</span></li>
+            <li><span>+38098000000</span></li>
+            <li><span className="user" onLoad={this.getUser}>{this.state.user}</span><button>Выход</button></li>
+            <span className="registration">
                 <form action={`${this.state.value}_registration`}>
-                    <button type="submit">Регистрация</button>
+                    <button type="submit" className="registration_button">Регистрация</button>
                     <select defaultValue={this.state.value} onChange={this.handleUserType}>
                         <option value="user">Пользователь</option>
                         <option value="volunteer">Волонтер</option>
@@ -33,7 +53,7 @@ class Menu extends Component {
                         <option value="support">Поддержка</option>
                     </select>
                 </form>
-            </li>
+            </span>
         </ul>
         );
     }
