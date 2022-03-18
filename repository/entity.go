@@ -2,12 +2,15 @@ package repository
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"image"
 )
 
 type Users struct {
 	ID       primitive.ObjectID `bson:"_id"`
 	Name     string             `bson:"name" json:"name" validate:"required,min=3"`
 	Nickname string             `bson:"nickname" json:"nickname" validate:"required,min=5"`
+	Avatar   image.Image        `bson:"avatar" json:"avatar"`
+	TgAcc    string             `bson:"tg_acc" json:"tg_acc" validate:"required""`
 	Gender   string             `bson:"gender" json:"gender" validate:"required"`
 	Status   string             `bson:"status" json:"status"`
 	Children bool               `bson:"children" json:"children"`

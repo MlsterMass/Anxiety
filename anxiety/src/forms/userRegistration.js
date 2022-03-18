@@ -7,6 +7,8 @@ class UserRegistration extends Component {
         this.state = {
             name:'Жанна',
             nickname:'ghost',
+            avatar:null,
+            tg_acc: '@ghost',
             gender:'Женский',
             status:'Введите информацию о вашем состоянии',
             children: 0,
@@ -17,13 +19,16 @@ class UserRegistration extends Component {
     }
 
     createUser = event => {
+        const formData = new FormData();
+        formData.append('avatar',this.state.avatar)
+
         event.preventDefault()
         axios.post(
-            `/registration/user?name=${this.state.name}&nickname=${this.state.nickname}&gender=${this.state.gender}&status=${this.state.status}&children=${this.state.children}&pets=${this.state.pets}&location=${this.state.location}&password=${this.state.password}`,
-            "",
+            `/registration/user?name=${this.state.name}&nickname=${this.state.nickname}&tg_acc=${this.state.tg_acc}&gender=${this.state.gender}&status=${this.state.status}&children=${this.state.children}&pets=${this.state.pets}&location=${this.state.location}&password=${this.state.password}`,
+            formData,
             {
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "multipart/form-data",
                 "Access-Control-Allow-Origin": "*",
             },
         })
@@ -42,6 +47,16 @@ class UserRegistration extends Component {
     handleNickname = event => {
         this.setState({
             nickname: event.target.value
+        });
+    }
+    handleAvatar = (event) => {
+        this.setState({
+            avatar: event.target.files[0]
+        });
+    }
+    handleTelegram = event => {
+        this.setState({
+            tg_acc: event.target.value
         });
     }
     handleGender = event => {
@@ -91,6 +106,19 @@ class UserRegistration extends Component {
                         <input type="text"
                                value={this.state.nickname}
                                onChange={this.handleNickname}
+                        />
+                    </div>
+                    <div>
+                        <label/>Аватар
+                        <input type="file"
+                               onChange={this.handleAvatar}
+                        />
+                    </div>
+                    <div>
+                        <label/>Телеграм
+                        <input type="text"
+                               value={this.state.tg_acc}
+                               onChange={this.handleTelegram}
                         />
                     </div>
                     <div>

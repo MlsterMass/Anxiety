@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"Anxiety/repository"
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -10,6 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/go-playground/validator.v9"
+	"image/jpeg"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -65,16 +68,33 @@ func RegistrationUser(w http.ResponseWriter, r *http.Request) {
 	}
 	children, err := strconv.ParseBool(r.FormValue("children"))
 	if err != nil {
-		fmt.Println("Incorrect value")
+		fmt.Fprintf(w, "Incorrect value: children\n")
 	}
 	pets, err := strconv.ParseBool(r.FormValue("pets"))
 	if err != nil {
-		fmt.Println("Incorrect value")
+		fmt.Fprintf(w, "Incorrect value: pets\n")
 	}
+	img, _, err := r.FormFile("avatar")
+	if err != nil {
+		fmt.Println("error while getting the Avatar")
+		fmt.Println(err)
+		return
+	}
+	defer img.Close()
+
+	avatarBytes, err := ioutil.ReadAll(img)
+
+	avatar, err := jpeg.Decode(bytes.NewReader(avatarBytes))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	user := repository.Users{
 		ID:       primitive.NewObjectID(),
 		Name:     r.FormValue("name"),
 		Nickname: r.FormValue("nickname"),
+		Avatar:   avatar,
+		TgAcc:    r.FormValue("tg_acc"),
 		Gender:   r.FormValue("gender"),
 		Status:   r.FormValue("status"),
 		Children: children,
