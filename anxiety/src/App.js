@@ -1,13 +1,8 @@
 import './App.css';
 import React, {Component} from "react";
-import Menu from "./components/menu";
-import AddSlider from "./components/addSlider";
-import Services from "./components/Services";
-import About from "./components/about";
-import Specialists from "./components/specialists";
-import Footer from "./components/footer";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from "./components/home";
+import Login from "./forms/login";
 import UserRegistration from "./forms/userRegistration";
 
 class App extends Component{
@@ -18,6 +13,12 @@ class App extends Component{
                     <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/user_registration" element={<UserRegistration />} />
+                        {/* TODO: init endpoints
+                        <Route path="/volunteer_registration" element={<UserRegistration />} />
+                        <Route path="/specialist_registration" element={<UserRegistration />} />
+                        <Route path="/support_registration" element={<UserRegistration />} />
+                        */}
+                        <Route path="/login" element={<Login />} />
                     </Routes>
                 </Router>
             </div>

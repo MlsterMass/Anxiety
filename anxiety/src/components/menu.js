@@ -17,10 +17,9 @@ class Menu extends Component {
     getUser = () => {
         axios.get(
             "/user",
-            "",
             {
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Content-Type": "multipart/form-data",
                     "Access-Control-Allow-Origin": "*",
                 },
             })
@@ -42,9 +41,9 @@ class Menu extends Component {
             <li><a href="">Контакты</a></li>
             <li><span>Anxiety bot TG</span></li>
             <li><span>+38098000000</span></li>
-            <li><span className="user" onLoad={this.getUser}>{this.state.user}</span><button>Выход</button></li>
+            {/*<li><span className="user" onLoad={this.getUser}>{this.state.user}</span><button>Выход</button></li>*/}
             <span className="registration">
-                <form action={`${this.state.value}_registration`}>
+                <form action={`${this.state.value}_api_registration`}>
                     <button type="submit" className="registration_button">Регистрация</button>
                     <select defaultValue={this.state.value} onChange={this.handleUserType}>
                         <option value="user">Пользователь</option>

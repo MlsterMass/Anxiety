@@ -2,25 +2,33 @@ package handlers
 
 import (
 	"Anxiety/repository"
-	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"gopkg.in/go-playground/validator.v9"
-	"image/jpeg"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 )
 
-var collection *mongo.Collection
-var validate *validator.Validate
+var (
+	userCollection       *mongo.Collection
+	volunteerCollection  *mongo.Collection
+	specialistCollection *mongo.Collection
+	supportCollection    *mongo.Collection
+	authErr              = map[string]string{"message": "User doesn't exists"}
+	authOK               = map[string]string{"message": "Auth successfully"}
+	userOK               = map[string]string{"message": "user created"}
+	volunteerOK          = map[string]string{"message": "volunteer created"}
+	supportOK            = map[string]string{"message": "support created"}
+	specialistOK         = map[string]string{"message": "specialist created"}
+)
 
 func init() {
 	loadTheEnv()
@@ -37,7 +45,6 @@ func loadTheEnv() {
 func createDBInstance() {
 	connectionString := os.Getenv("DB_URI")
 	dbName := os.Getenv("DB_NAME")
-	collName := os.Getenv("DB_USERS")
 	credential := options.Credential{
 		Username: os.Getenv("DB_ADMIN"),
 		Password: os.Getenv("DB_ADMIN_PASSWORD"),
@@ -57,90 +64,275 @@ func createDBInstance() {
 
 	fmt.Println("connected to mongodb!")
 
-	collection = client.Database(dbName).Collection(collName)
+	userCollection = client.Database(dbName).Collection("users")
+	volunteerCollection = client.Database(dbName).Collection("volunteers")
+	specialistCollection = client.Database(dbName).Collection("specialist")
+	supportCollection = client.Database(dbName).Collection("support")
+
 	fmt.Println("collection instance created")
 }
 
 func RegistrationUser(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		fmt.Fprintf(w, "ParseForm() err: %v", err)
-		return
+	body, readErr := ioutil.ReadAll(r.Body)
+	if readErr != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("reading error"))
 	}
-	children, err := strconv.ParseBool(r.FormValue("children"))
-	if err != nil {
-		fmt.Fprintf(w, "Incorrect value: children\n")
-	}
-	pets, err := strconv.ParseBool(r.FormValue("pets"))
-	if err != nil {
-		fmt.Fprintf(w, "Incorrect value: pets\n")
-	}
-	img, _, err := r.FormFile("avatar")
-	if err != nil {
-		fmt.Println("error while getting the Avatar")
-		fmt.Println(err)
-		return
-	}
-	defer img.Close()
+	defer r.Body.Close()
 
-	avatarBytes, err := ioutil.ReadAll(img)
-
-	avatar, err := jpeg.Decode(bytes.NewReader(avatarBytes))
-	if err != nil {
-		log.Fatalln(err)
+	user := repository.Users{}
+	jsonErr := json.Unmarshal(body, &user)
+	if jsonErr != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("not supported format"))
 	}
-
-	user := repository.Users{
+	user = repository.Users{
 		ID:       primitive.NewObjectID(),
-		Name:     r.FormValue("name"),
-		Nickname: r.FormValue("nickname"),
-		Avatar:   avatar,
-		TgAcc:    r.FormValue("tg_acc"),
-		Gender:   r.FormValue("gender"),
-		Status:   r.FormValue("status"),
-		Children: children,
-		Pets:     pets,
-		Location: r.FormValue("location"),
-		Password: r.FormValue("password"),
+		Name:     user.Name,
+		Nickname: user.Nickname,
+		Password: user.Password,
+		TgAcc:    user.TgAcc,
+		Gender:   user.Gender,
+		Status:   user.Status,
+		Children: user.Children,
+		Pets:     user.Pets,
+		Location: user.Location,
 	}
-	err = validateStruct(user)
+	err := repository.ValidateUserStruct(user)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
-	createdUser, err := collection.InsertOne(context.Background(), user)
+	userCreated, err := userCollection.InsertOne(context.Background(), user)
 	if err != nil {
-		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Error : %v", err)
+		return
 	}
-	fmt.Println("User created ", createdUser.InsertedID)
-
-}
-func User(w http.ResponseWriter, r *http.Request) {
-	user := mux.Vars(r)
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Specialist: %v\n", user)
-
+	json.NewEncoder(w).Encode(userOK)
+	fmt.Printf("userCreated : %v\n", userCreated.InsertedID)
 }
 
-func Auth(w http.ResponseWriter, r *http.Request) {
-	user := mux.Vars(r)
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Specialist: %v\n", user)
+func RegistrationVolunteer(w http.ResponseWriter, r *http.Request) {
+	body, readErr := ioutil.ReadAll(r.Body)
+	if readErr != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("reading error"))
+	}
+	defer r.Body.Close()
 
+	volunteer := repository.Volunteers{}
+	jsonErr := json.Unmarshal(body, &volunteer)
+	if jsonErr != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("not supported format"))
+	}
+	volunteer = repository.Volunteers{
+		ID:       primitive.NewObjectID(),
+		Name:     volunteer.Name,
+		Nickname: volunteer.Nickname,
+		Password: volunteer.Password,
+		Gender:   volunteer.Gender,
+		Location: volunteer.Location,
+	}
+	err := repository.ValidateVolunteerStruct(volunteer)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+	volunteerCreated, err := volunteerCollection.InsertOne(context.Background(), volunteer)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Error : %v", err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(volunteerOK)
+	fmt.Printf("volunteerCreated : %v\n", volunteerCreated.InsertedID)
+}
+func RegistrationSpecialist(w http.ResponseWriter, r *http.Request) {
+	body, readErr := ioutil.ReadAll(r.Body)
+	if readErr != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("reading error"))
+	}
+	defer r.Body.Close()
+
+	specialist := repository.Specialists{}
+	jsonErr := json.Unmarshal(body, &specialist)
+	if jsonErr != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("not supported format"))
+	}
+	specialist = repository.Specialists{
+		ID:        primitive.NewObjectID(),
+		Firstname: specialist.Firstname,
+		Lastname:  specialist.Lastname,
+		Nickname:  specialist.Nickname,
+		Gender:    specialist.Gender,
+		Location:  specialist.Location,
+		Sphere:    specialist.Sphere,
+		Password:  specialist.Password,
+	}
+	err := repository.ValidateSpecialistStruct(specialist)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+	specialistCreated, err := specialistCollection.InsertOne(context.Background(), specialist)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Error : %v", err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(specialistOK)
+	fmt.Printf("specialistCreated : %v\n", specialistCreated.InsertedID)
+}
+func RegistrationSupport(w http.ResponseWriter, r *http.Request) {
+	body, readErr := ioutil.ReadAll(r.Body)
+	if readErr != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("reading error"))
+	}
+	defer r.Body.Close()
+
+	support := repository.Support{}
+	jsonErr := json.Unmarshal(body, &support)
+	if jsonErr != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("not supported format"))
+	}
+	support = repository.Support{
+		ID:       primitive.NewObjectID(),
+		Name:     support.Name,
+		Nickname: support.Nickname,
+		Password: support.Password,
+		Gender:   support.Gender,
+		Location: support.Location,
+	}
+	err := repository.ValidateSupportStruct(support)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+	supportCreated, err := supportCollection.InsertOne(context.Background(), support)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Error : %v", err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(supportOK)
+	fmt.Printf("supportCreated : %v\n", supportCreated.InsertedID)
+}
+func LoginUser(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("reading error"))
+	}
+	defer r.Body.Close()
+	user := repository.Users{}
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("not supported format"))
+	}
+	user = repository.Users{
+		Nickname: user.Nickname,
+		Password: user.Password,
+	}
+	err = userCollection.FindOne(context.TODO(),
+		bson.D{{"nickname", user.Nickname},
+			{"password", user.Password},
+		}).Decode(&user)
+	if err == mongo.ErrNoDocuments {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(authErr)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(authOK)
+	fmt.Print(authOK["message"])
+}
+func LoginVolunteer(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("reading error"))
+	}
+	defer r.Body.Close()
+	volunteer := repository.Volunteers{}
+	err = json.Unmarshal(body, &volunteer)
+	if err != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("not supported format"))
+	}
+	volunteer = repository.Volunteers{
+		Nickname: volunteer.Nickname,
+		Password: volunteer.Password,
+	}
+	err = volunteerCollection.FindOne(context.TODO(),
+		bson.D{{"nickname", volunteer.Nickname},
+			{"password", volunteer.Password},
+		}).Decode(&volunteer)
+	if err == mongo.ErrNoDocuments {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(authErr)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(authOK)
+	fmt.Print(authOK["message"])
+}
+func LoginSpecialist(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("reading error"))
+	}
+	defer r.Body.Close()
+	specialist := repository.Specialists{}
+	err = json.Unmarshal(body, &specialist)
+	if err != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("not supported format"))
+	}
+	specialist = repository.Specialists{
+		Nickname: specialist.Nickname,
+		Password: specialist.Password,
+	}
+	err = specialistCollection.FindOne(context.TODO(),
+		bson.D{{"nickname", specialist.Nickname},
+			{"password", specialist.Password},
+		}).Decode(&specialist)
+	if err == mongo.ErrNoDocuments {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(authErr)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(authOK)
+	fmt.Print(authOK["message"])
+}
+
+func LoginSupport(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("reading error"))
+	}
+	defer r.Body.Close()
+	support := repository.Support{}
+	err = json.Unmarshal(body, &support)
+	if err != nil {
+		fmt.Fprintf(w, "error: %v\n", errors.New("not supported format"))
+	}
+	support = repository.Support{
+		Nickname: support.Nickname,
+		Password: support.Password,
+	}
+	err = supportCollection.FindOne(context.TODO(),
+		bson.D{{"nickname", support.Nickname},
+			{"password", support.Password},
+		}).Decode(&support)
+	if err == mongo.ErrNoDocuments {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(authErr)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(authOK)
+	fmt.Print(authOK["message"])
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	user := mux.Vars(r)
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Specialist: %v\n", user)
 
-}
-func validateStruct(user repository.Users) error {
-	validate = validator.New()
-	err := validate.Struct(user)
-	if err != nil {
-		return err
-	}
-	return nil
 }

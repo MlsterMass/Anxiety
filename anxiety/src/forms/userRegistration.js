@@ -34,6 +34,9 @@ class UserRegistration extends Component {
         })
             .then(response=> {
                 console.log(response);
+                if (response.status === 200) {
+                    window.location = "/login"
+                }
             })
             .catch(error => {
                 console.log(error);

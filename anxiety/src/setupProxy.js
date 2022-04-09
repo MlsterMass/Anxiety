@@ -4,6 +4,10 @@ module.exports = app => {
         createProxyMiddleware("/registration",{
             target: "http://localhost:8888",
             changeOrigin:  true
-        })
+        }),
+        createProxyMiddleware("/login",{
+            target: "http://localhost:8888",
+            changeOrigin:  true
+        }),
     )
 }
