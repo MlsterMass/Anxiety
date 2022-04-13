@@ -1,7 +1,7 @@
-package main
+package router
 
 import (
-	"Anxiety/handlers"
+	"github.com/MlsterMass/Anxiety/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -23,12 +23,12 @@ func InitRouter() *mux.Router {
 	l.HandleFunc("/support", handlers.LoginSupport).Methods("POST")
 
 	router.HandleFunc("/logout", handlers.Logout).Methods("GET")
-	//
-	//r.HandleFunc("/services/{category}", handlers.ServiceHandler).Methods("GET")
-	//r.HandleFunc("/specialists/{id}", handlers.SpecialistsHandler).Methods("GET")
-	//r.HandleFunc("/fasthelp", handlers.FastHelpHandler).Methods("GET")
-	//r.HandleFunc("/about", handlers.AboutHandler).Methods("GET")
-	//r.HandleFunc("/contacts", handlers.ContactsHandler).Methods("GET")
+
+	r.HandleFunc("/services/{category}", handlers.ServiceHandler).Methods("GET")
+	r.HandleFunc("/specialists/{id}", handlers.SpecialistsHandler).Methods("GET")
+	r.HandleFunc("/fasthelp", handlers.FastHelpHandler).Methods("GET")
+	r.HandleFunc("/about", handlers.AboutHandler).Methods("GET")
+	r.HandleFunc("/contacts", handlers.ContactsHandler).Methods("GET")
 
 	return router
 }

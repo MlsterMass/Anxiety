@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"Anxiety/repository"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/MlsterMass/Anxiety/repository"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
