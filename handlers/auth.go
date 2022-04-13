@@ -22,7 +22,10 @@ var (
 	volunteerCollection  *mongo.Collection
 	specialistCollection *mongo.Collection
 	supportCollection    *mongo.Collection
-	authErr              = map[string]string{"message": "User doesn't exists"}
+	authUserErr          = map[string]string{"message": "User doesn't exists"}
+	authVolunteerErr     = map[string]string{"message": "Volunteer doesn't exists"}
+	authSpecialistErr    = map[string]string{"message": "Specialist doesn't exists"}
+	authSupportErr       = map[string]string{"message": "Support doesn't exists"}
 	authOK               = map[string]string{"message": "Auth successfully"}
 	userOK               = map[string]string{"message": "user created"}
 	volunteerOK          = map[string]string{"message": "volunteer created"}
@@ -240,11 +243,11 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		}).Decode(&user)
 	if err == mongo.ErrNoDocuments {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(authErr)
+		json.NewEncoder(w).Encode(authUserErr)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(authOK)
+	json.NewEncoder(w).Encode(userOK)
 	fmt.Print(authOK["message"])
 }
 func LoginVolunteer(w http.ResponseWriter, r *http.Request) {
@@ -268,7 +271,7 @@ func LoginVolunteer(w http.ResponseWriter, r *http.Request) {
 		}).Decode(&volunteer)
 	if err == mongo.ErrNoDocuments {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(authErr)
+		json.NewEncoder(w).Encode(authVolunteerErr)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -296,7 +299,7 @@ func LoginSpecialist(w http.ResponseWriter, r *http.Request) {
 		}).Decode(&specialist)
 	if err == mongo.ErrNoDocuments {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(authErr)
+		json.NewEncoder(w).Encode(authSpecialistErr)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -325,7 +328,7 @@ func LoginSupport(w http.ResponseWriter, r *http.Request) {
 		}).Decode(&support)
 	if err == mongo.ErrNoDocuments {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(authErr)
+		json.NewEncoder(w).Encode(authSupportErr)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
